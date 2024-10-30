@@ -1,0 +1,7 @@
+server:
+  port: 8080
+dynamodb:
+  endpoint: "http://localhost:4566"
+  region: "sa-east-1"
+telemetry:
+  hostname: "http://127.0.0.1:14268"

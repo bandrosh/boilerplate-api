@@ -24,6 +24,19 @@ services:
       timeout: 5s
       retries: 15
 
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin:4.6.1
+    container_name: bp_dynamodb_admin
+    environment:
+      DYNAMO_ENDPOINT: http://localstack:4566
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    ports:
+      - "8001:8001"   # DynamoDB Admin UI
+    depends_on:
+      - localstack
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.111.0
     container_name: bp_otel_collector

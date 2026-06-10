@@ -66,7 +66,7 @@ cp .env.example .env
 make run             # go run ./cmd/api
 ```
 
-A API sobe em `http://localhost:8080`.
+A API sobe em `http://127.0.0.1:8080`.
 
 ## Endpoints
 
@@ -82,25 +82,28 @@ A API sobe em `http://localhost:8080`.
 
 Exemplo:
 ```bash
-curl -X POST localhost:8080/api/v1/users \
+curl -X POST 127.0.0.1:8080/api/v1/users \
   -H 'Content-Type: application/json' \
   -d '{"name":"Ada Lovelace","email":"ada@example.com"}'
 
 # Listagem paginada
-curl "localhost:8080/api/v1/users?limit=10"
+curl "127.0.0.1:8080/api/v1/users?limit=10"
 # => {"items":[...],"next_cursor":"..."}  (use o cursor na próxima página)
 ```
 
-## Observabilidade
+## Serviços (UI / observabilidade)
 
-| Serviço     | URL                     | Login        |
-|-------------|-------------------------|--------------|
-| Grafana     | http://localhost:3000   | admin / admin |
-| Prometheus  | http://localhost:9090   | –            |
-| Tempo (API) | http://localhost:3200   | –            |
-| LocalStack  | http://localhost:4566   | –            |
+> No Windows/macOS use **`127.0.0.1`**, não `localhost`: o `localhost` resolve para IPv6 (`::1`) e as portas publicadas do Docker Desktop só respondem em IPv4, causando timeout no navegador.
 
-A aplicação exporta traces e métricas via OTLP (`localhost:4317`) para o OTEL Collector, que distribui para Tempo (traces) e Prometheus (métricas). O Grafana já vem com os datasources provisionados e um dashboard de HTTP.
+| Serviço         | URL                       | Login         |
+|-----------------|---------------------------|---------------|
+| Grafana         | http://127.0.0.1:3000     | admin / admin |
+| Prometheus      | http://127.0.0.1:9090     | –             |
+| Tempo (API)     | http://127.0.0.1:3200     | –             |
+| DynamoDB Admin  | http://127.0.0.1:8001     | –             |
+| LocalStack      | http://127.0.0.1:4566     | –             |
+
+A aplicação exporta traces e métricas via OTLP (`127.0.0.1:4317`) para o OTEL Collector, que distribui para Tempo (traces) e Prometheus (métricas). O Grafana já vem com os datasources provisionados e um dashboard de HTTP. O **DynamoDB Admin** permite navegar pelas tabelas do DynamoDB no LocalStack.
 
 ## Comandos úteis
 

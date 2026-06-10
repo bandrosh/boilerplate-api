@@ -27,8 +27,12 @@ tidy: ## Sync go.mod/go.sum
 
 # ─── Quality ─────────────────────────────────────────────────
 .PHONY: test
-test: ## Run tests with race detector and coverage
+test: ## Run unit tests with race detector and coverage
 	go test -race -cover ./...
+
+.PHONY: test-integration
+test-integration: ## Run integration tests (requires infra up: make infra-up)
+	go test -tags integration ./...
 
 .PHONY: vet
 vet: ## Run go vet

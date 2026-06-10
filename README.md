@@ -111,10 +111,16 @@ A aplicação exporta traces e métricas via OTLP (`127.0.0.1:4317`) para o OTEL
 make help            # lista todos os alvos
 make db-tables       # lista as tabelas no DynamoDB (LocalStack)
 make db-scan         # scan da tabela (debug)
-make test            # testes com -race e cobertura
+make test            # testes unitários (-race e cobertura)
+make test-integration # testes de integração (requer infra: make infra-up)
 make lint            # golangci-lint
 make infra-down      # derruba a infra
 ```
+
+## Testes
+
+- **Unitários:** domínio (`internal/domain/user`) e casos de uso (`internal/application/user`, com fake repository). Rodam sempre: `make test`.
+- **Integração:** repositório DynamoDB contra o LocalStack, atrás da build tag `integration`. Suba a infra (`make infra-up`) e rode `make test-integration`. No CI há um job dedicado com LocalStack.
 
 ## Adicionando uma nova feature
 

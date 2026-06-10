@@ -46,7 +46,7 @@ type AWS struct {
 
 type Observability struct {
 	Enabled      bool   `env:"OTEL_ENABLED"                 envDefault:"true"`
-	OTLPEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT" envDefault:"127.0.0.1:4317"`
+	OTLPEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT" envDefault:"http://127.0.0.1:4317"`
 	ServiceName  string `env:"OTEL_SERVICE_NAME"            envDefault:"boilerplate-api"`
 }
 

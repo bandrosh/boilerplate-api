@@ -59,8 +59,7 @@ func Setup(ctx context.Context, cfg config.Observability, appEnv string) (Shutdo
 
 func setupTraces(ctx context.Context, cfg config.Observability, res *resource.Resource) (ShutdownFunc, error) {
 	exporter, err := otlptracegrpc.New(ctx,
-		otlptracegrpc.WithEndpoint(cfg.OTLPEndpoint),
-		otlptracegrpc.WithInsecure(),
+		otlptracegrpc.WithEndpointURL(cfg.OTLPEndpoint),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("trace exporter: %w", err)
@@ -76,8 +75,7 @@ func setupTraces(ctx context.Context, cfg config.Observability, res *resource.Re
 
 func setupMetrics(ctx context.Context, cfg config.Observability, res *resource.Resource) (ShutdownFunc, error) {
 	exporter, err := otlpmetricgrpc.New(ctx,
-		otlpmetricgrpc.WithEndpoint(cfg.OTLPEndpoint),
-		otlpmetricgrpc.WithInsecure(),
+		otlpmetricgrpc.WithEndpointURL(cfg.OTLPEndpoint),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("metric exporter: %w", err)

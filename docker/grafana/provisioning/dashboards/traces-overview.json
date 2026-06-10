@@ -1,0 +1,30 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "panels": [
+    {
+      "title": "Recent traces (boilerplate-api)",
+      "type": "table",
+      "datasource": { "type": "tempo", "uid": "tempo" },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "tempo", "uid": "tempo" },
+          "queryType": "traceql",
+          "query": "{ resource.service.name = \"boilerplate-api\" }",
+          "limit": 50,
+          "tableType": "traces"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["boilerplate-api", "traces"],
+  "templating": { "list": [] },
+  "time": { "from": "now-30m", "to": "now" },
+  "refresh": "10s",
+  "title": "Boilerplate API – Traces",
+  "uid": "boilerplate-traces",
+  "version": 1
+}

@@ -100,10 +100,11 @@ curl "127.0.0.1:8080/api/v1/users?limit=10"
 | Grafana         | http://127.0.0.1:3000     | admin / admin |
 | Prometheus      | http://127.0.0.1:9090     | –             |
 | Tempo (API)     | http://127.0.0.1:3200     | –             |
+| Jaeger UI       | http://127.0.0.1:16686    | –             |
 | DynamoDB Admin  | http://127.0.0.1:8001     | –             |
 | LocalStack      | http://127.0.0.1:4566     | –             |
 
-A aplicação exporta traces e métricas via OTLP (`127.0.0.1:4317`) para o OTEL Collector, que distribui para Tempo (traces) e Prometheus (métricas). O Grafana já vem com os datasources provisionados e um dashboard de HTTP. O **DynamoDB Admin** permite navegar pelas tabelas do DynamoDB no LocalStack.
+A aplicação exporta traces e métricas via OTLP (`127.0.0.1:4317`) para o OTEL Collector, que distribui para Tempo e Jaeger (traces) e Prometheus (métricas). O Grafana já vem com os datasources provisionados e um dashboard de HTTP. O **DynamoDB Admin** permite navegar pelas tabelas do DynamoDB no LocalStack.
 
 ## Comandos úteis
 

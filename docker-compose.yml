@@ -48,6 +48,7 @@ services:
       - "4318:4318"   # OTLP HTTP
     depends_on:
       - tempo
+      - jaeger
 
   prometheus:
     image: prom/prometheus:v2.55.0
@@ -68,6 +69,14 @@ services:
       - tempodata:/var/tempo
     ports:
       - "3200:3200"   # Tempo query API
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    container_name: bp_jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"   # Jaeger UI
 
   grafana:
     image: grafana/grafana:11.3.0

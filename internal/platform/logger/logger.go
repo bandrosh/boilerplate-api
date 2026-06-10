@@ -1,4 +1,3 @@
-// Package logger builds the application's structured logger (slog).
 package logger
 
 import (
@@ -9,8 +8,6 @@ import (
 	"github.com/bandrosh/boilerplate-api/internal/platform/config"
 )
 
-// New returns a configured *slog.Logger based on the Log config. "json" format
-// is recommended for production; "text" is friendlier when running in the IDE.
 func New(cfg config.Log) *slog.Logger {
 	opts := &slog.HandlerOptions{Level: parseLevel(cfg.Level)}
 

@@ -1,5 +1,3 @@
-// Package observability wires OpenTelemetry traces and metrics, exporting them
-// over OTLP/gRPC to the collector defined in the docker infrastructure.
 package observability
 
 import (
@@ -21,11 +19,8 @@ import (
 	"github.com/bandrosh/boilerplate-api/internal/platform/config"
 )
 
-// ShutdownFunc flushes and releases the telemetry providers. Always defer it.
 type ShutdownFunc func(context.Context) error
 
-// Setup installs global trace and meter providers. When telemetry is disabled
-// it returns a no-op shutdown so callers don't need to special-case it.
 func Setup(ctx context.Context, cfg config.Observability, appEnv string) (ShutdownFunc, error) {
 	if !cfg.Enabled {
 		return func(context.Context) error { return nil }, nil

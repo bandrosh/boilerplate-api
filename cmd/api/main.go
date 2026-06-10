@@ -1,6 +1,3 @@
-// Command api is the composition root of the service. It wires configuration,
-// logging, observability, persistence and the HTTP transport, then runs the
-// server until an interrupt signal triggers a graceful shutdown.
 package main
 
 import (
@@ -28,7 +25,7 @@ func main() {
 }
 
 func run() error {
-	// Root context cancelled on SIGINT/SIGTERM for graceful shutdown.
+
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
@@ -44,21 +41,18 @@ func run() error {
 		slog.String("env", cfg.App.Env),
 	)
 
-	// Observability (traces + metrics) exported to the OTEL collector.
 	shutdownOtel, err := observability.Setup(ctx, cfg.Observability, cfg.App.Env)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = shutdownOtel(context.Background()) }()
 
-	// Persistence (DynamoDB via LocalStack in development).
 	dynamoClient, err := dynamodb.NewClient(ctx, cfg.AWS)
 	if err != nil {
 		return err
 	}
 	log.Info("dynamodb client ready", slog.String("table", cfg.AWS.DynamoTable))
 
-	// Dependency wiring (hexagonal: adapter -> port -> use case -> handler).
 	userRepo := dynamodb.NewUserRepository(dynamoClient, cfg.AWS.DynamoTable)
 	userSvc := appuser.NewService(userRepo, log)
 	userHandler := handler.NewUserHandler(userSvc)
@@ -72,7 +66,6 @@ func run() error {
 
 	srv := server.New(cfg.HTTP, router, log)
 
-	// Run the server; capture a startup failure on a channel.
 	serverErr := make(chan error, 1)
 	go func() { serverErr <- srv.Start() }()
 

@@ -1,5 +1,3 @@
-// Package middleware holds custom HTTP middlewares that complement chi's
-// built-ins (RequestID, RealIP, Recoverer).
 package middleware
 
 import (
@@ -10,8 +8,6 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-// RequestLogger logs each request with structured fields and the chi request id,
-// emitting at warn/error for 4xx/5xx responses.
 func RequestLogger(log *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

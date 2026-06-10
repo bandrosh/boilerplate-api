@@ -1,6 +1,3 @@
-// Package dynamodb is the outbound persistence adapter backed by Amazon
-// DynamoDB (LocalStack in development). It owns the SDK client and the
-// repository implementations that satisfy the domain ports.
 package dynamodb
 
 import (
@@ -15,9 +12,6 @@ import (
 	"github.com/bandrosh/boilerplate-api/internal/platform/config"
 )
 
-// NewClient builds a DynamoDB client. When AWS_ENDPOINT_URL is set (LocalStack)
-// it overrides the base endpoint and uses static credentials; in real AWS the
-// endpoint is empty and the default credential chain is used.
 func NewClient(ctx context.Context, cfg config.AWS) (*dynamodb.Client, error) {
 	opts := []func(*awsconfig.LoadOptions) error{
 		awsconfig.WithRegion(cfg.Region),
@@ -40,18 +34,15 @@ func NewClient(ctx context.Context, cfg config.AWS) (*dynamodb.Client, error) {
 	}), nil
 }
 
-// HealthChecker verifies DynamoDB connectivity for the readiness probe.
 type HealthChecker struct {
 	client *dynamodb.Client
 	table  string
 }
 
-// NewHealthChecker builds the readiness checker for a given table.
 func NewHealthChecker(client *dynamodb.Client, table string) *HealthChecker {
 	return &HealthChecker{client: client, table: table}
 }
 
-// Ping confirms the table is reachable by describing it.
 func (h *HealthChecker) Ping(ctx context.Context) error {
 	_, err := h.client.DescribeTable(ctx, &dynamodb.DescribeTableInput{
 		TableName: aws.String(h.table),

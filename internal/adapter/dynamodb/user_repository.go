@@ -16,33 +16,22 @@ import (
 	domain "github.com/bandrosh/boilerplate-api/internal/domain/user"
 )
 
-// Single-table design:
-//
-//	User item       PK = USER#<id>     SK = USER#<id>
-//	                GSI1PK = USER       GSI1SK = <createdAt>#<id>   (for listing)
-//	Email-lock item PK = EMAIL#<email> SK = EMAIL#<email>          (uniqueness)
-//
-// Creation writes both items in a single transaction with attribute_not_exists
-// conditions, guaranteeing e-mail uniqueness.
 const (
 	gsi1Name      = "GSI1"
 	userPartition = "USER"
 )
 
-// UserRepository implements domain/user.Repository on top of DynamoDB.
 type UserRepository struct {
 	client *dynamodb.Client
 	table  string
 }
 
-// NewUserRepository builds the repository for a given table.
 func NewUserRepository(client *dynamodb.Client, table string) *UserRepository {
 	return &UserRepository{client: client, table: table}
 }
 
 var _ domain.Repository = (*UserRepository)(nil)
 
-// userItem is the persisted representation of a User (the main item).
 type userItem struct {
 	PK         string    `dynamodbav:"PK"`
 	SK         string    `dynamodbav:"SK"`
@@ -141,7 +130,7 @@ func (r *UserRepository) List(ctx context.Context, limit int32, cursor string) (
 		IndexName:                 aws.String(gsi1Name),
 		KeyConditionExpression:    aws.String("GSI1PK = :pk"),
 		ExpressionAttributeValues: map[string]ddbtypes.AttributeValue{":pk": &ddbtypes.AttributeValueMemberS{Value: userPartition}},
-		ScanIndexForward:          aws.Bool(false), // newest first
+		ScanIndexForward:          aws.Bool(false),
 		Limit:                     aws.Int32(limit),
 		ExclusiveStartKey:         startKey,
 	})
@@ -179,7 +168,7 @@ func (r *UserRepository) Update(ctx context.Context, u *domain.User) error {
 		UpdateExpression:    aws.String("SET #name = :name, UpdatedAt = :updated"),
 		ConditionExpression: aws.String("attribute_exists(PK)"),
 		ExpressionAttributeNames: map[string]string{
-			"#name": "Name", // Name is a DynamoDB reserved word
+			"#name": "Name",
 		},
 		ExpressionAttributeValues: map[string]ddbtypes.AttributeValue{
 			":name":    &ddbtypes.AttributeValueMemberS{Value: u.Name()},
@@ -193,7 +182,7 @@ func (r *UserRepository) Update(ctx context.Context, u *domain.User) error {
 }
 
 func (r *UserRepository) Delete(ctx context.Context, id domain.ID) error {
-	// Need the e-mail to remove the uniqueness lock atomically.
+
 	u, err := r.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -231,8 +220,6 @@ func toDomain(item userItem) (*domain.User, error) {
 	}
 	return domain.Hydrate(id, item.Name, email, item.CreatedAt, item.UpdatedAt), nil
 }
-
-// ─── cursor helpers ──────────────────────────────────────────
 
 type cursorKey struct {
 	PK     string `dynamodbav:"PK"`
@@ -274,8 +261,6 @@ func decodeCursor(cursor string) (map[string]ddbtypes.AttributeValue, error) {
 	}
 	return key, nil
 }
-
-// ─── error classification ────────────────────────────────────
 
 func isTransactionConflict(err error) bool {
 	var tce *ddbtypes.TransactionCanceledException

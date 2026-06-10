@@ -13,18 +13,14 @@ import (
 	app "github.com/bandrosh/boilerplate-api/internal/application/user"
 )
 
-// UserHandler exposes the User use cases over HTTP. It depends on the
-// application Service, not on the domain or persistence directly.
 type UserHandler struct {
 	svc *app.Service
 }
 
-// NewUserHandler builds the handler.
 func NewUserHandler(svc *app.Service) *UserHandler {
 	return &UserHandler{svc: svc}
 }
 
-// Routes returns a chi router with the user endpoints mounted.
 func (h *UserHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 	r.Post("/", h.Create)

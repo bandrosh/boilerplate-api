@@ -124,7 +124,7 @@ func parseInt(raw string, def int32) int32 {
 	if raw == "" {
 		return def
 	}
-	v, err := strconv.Atoi(raw)
+	v, err := strconv.ParseInt(raw, 10, 32)
 	if err != nil {
 		return def
 	}

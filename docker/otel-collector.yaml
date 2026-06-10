@@ -18,6 +18,12 @@ exporters:
     tls:
       insecure: true
 
+  # Traces -> Jaeger (OTLP gRPC).
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+
   # Metrics -> Prometheus scrape endpoint exposed by the collector.
   prometheus:
     endpoint: 0.0.0.0:8889
@@ -27,7 +33,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/tempo]
+      exporters: [otlp/tempo, otlp/jaeger]
     metrics:
       receivers: [otlp]
       processors: [batch]

@@ -48,7 +48,7 @@ type Log struct {
 // local development and is left empty in real AWS environments.
 type AWS struct {
 	Region          string `env:"AWS_REGION"            envDefault:"us-east-1"`
-	Endpoint        string `env:"AWS_ENDPOINT_URL"      envDefault:"http://localhost:4566"`
+	Endpoint        string `env:"AWS_ENDPOINT_URL"      envDefault:"http://127.0.0.1:4566"`
 	AccessKeyID     string `env:"AWS_ACCESS_KEY_ID"     envDefault:"test"`
 	SecretAccessKey string `env:"AWS_SECRET_ACCESS_KEY" envDefault:"test"`
 	DynamoTable     string `env:"DYNAMODB_TABLE"        envDefault:"boilerplate"`
@@ -57,7 +57,7 @@ type AWS struct {
 // Observability holds OpenTelemetry settings.
 type Observability struct {
 	Enabled      bool   `env:"OTEL_ENABLED"                 envDefault:"true"`
-	OTLPEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT" envDefault:"localhost:4317"`
+	OTLPEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT" envDefault:"127.0.0.1:4317"`
 	ServiceName  string `env:"OTEL_SERVICE_NAME"            envDefault:"boilerplate-api"`
 }
 

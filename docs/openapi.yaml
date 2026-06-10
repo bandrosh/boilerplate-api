@@ -16,6 +16,10 @@ paths:
     get:
       tags: [Health]
       summary: Liveness probe
+      description: >-
+        Returns 200 as long as the process is running. It does not touch any
+        dependency, so it is safe to use as a Kubernetes liveness probe — a
+        failure here means the process should be restarted.
       responses:
         "200":
           description: Service is up
@@ -29,6 +33,10 @@ paths:
     get:
       tags: [Health]
       summary: Readiness probe (checks DynamoDB)
+      description: >-
+        Reports whether the service can serve traffic. It verifies DynamoDB
+        connectivity (DescribeTable) within a short timeout; use it as a
+        readiness probe so traffic is only routed once dependencies are reachable.
       responses:
         "200":
           description: Ready
@@ -40,11 +48,16 @@ paths:
                   status: { type: string, example: ok }
                   database: { type: string, example: up }
         "503":
-          description: Not ready
+          description: Not ready (a dependency is unavailable)
   /api/v1/users:
     post:
       tags: [Users]
       summary: Create a user
+      description: >-
+        Creates a new user from a name and a unique e-mail. The e-mail is
+        normalized (trimmed/lower-cased) and validated; uniqueness is enforced
+        atomically in DynamoDB, so a duplicate e-mail returns 409. Returns the
+        created user with its generated id and timestamps.
       requestBody:
         required: true
         content:
@@ -59,13 +72,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
         "409":
-          description: Email already exists
+          description: A user with this e-mail already exists
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
         "422":
-          description: Validation error
+          description: Validation error (missing name or invalid e-mail)
           content:
             application/json:
               schema:
@@ -73,12 +86,19 @@ paths:
     get:
       tags: [Users]
       summary: List users (cursor-paginated)
+      description: >-
+        Returns a page of users ordered by creation date (newest first). Use
+        `limit` to size the page (default 20, max 100) and pass the `next_cursor`
+        from a previous response as `cursor` to fetch the following page. An
+        empty `next_cursor` means there are no more results.
       parameters:
         - name: limit
           in: query
+          description: Maximum number of items to return (1–100, default 20).
           schema: { type: integer, default: 20, maximum: 100 }
         - name: cursor
           in: query
+          description: Opaque pagination cursor returned as `next_cursor`.
           schema: { type: string }
       responses:
         "200":
@@ -92,10 +112,14 @@ paths:
       - name: id
         in: path
         required: true
+        description: The user's UUID.
         schema: { type: string, format: uuid }
     get:
       tags: [Users]
       summary: Get a user by id
+      description: >-
+        Fetches a single user by its UUID. Returns 404 if no user exists with
+        that id, or 400 if the id is not a valid UUID.
       responses:
         "200":
           description: The user
@@ -104,7 +128,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
         "404":
-          description: Not found
+          description: User not found
           content:
             application/json:
               schema:
@@ -112,6 +136,10 @@ paths:
     put:
       tags: [Users]
       summary: Update a user's name
+      description: >-
+        Updates the mutable fields of a user (currently the name). The name is
+        trimmed and must not be empty. Returns the updated user with a refreshed
+        `updated_at`, or 404 if the user does not exist.
       requestBody:
         required: true
         content:
@@ -126,7 +154,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
         "404":
-          description: Not found
+          description: User not found
           content:
             application/json:
               schema:
@@ -134,11 +162,15 @@ paths:
     delete:
       tags: [Users]
       summary: Delete a user
+      description: >-
+        Permanently deletes a user and releases its e-mail uniqueness lock, so
+        the same e-mail can be reused afterwards. Returns 204 on success or 404
+        if the user does not exist.
       responses:
         "204":
           description: Deleted
         "404":
-          description: Not found
+          description: User not found
           content:
             application/json:
               schema:

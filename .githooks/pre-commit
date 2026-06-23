@@ -1,0 +1,19 @@
+#!/bin/sh
+# Local pre-commit gate: code must build, vet clean, and unit tests must pass
+# before a commit is created. The authoritative >=99% new-code coverage gate
+# runs in CI (see .github/workflows/ci.yml, job "New-code coverage").
+#
+# Install once after cloning:  make hooks
+# Bypass in an emergency:       git commit --no-verify   (discouraged)
+set -e
+
+echo "[pre-commit] go vet ./..."
+go vet ./...
+
+echo "[pre-commit] go build ./..."
+go build ./...
+
+echo "[pre-commit] go test ./..."
+go test ./...
+
+echo "[pre-commit] OK"

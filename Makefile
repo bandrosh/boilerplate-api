@@ -34,6 +34,22 @@ test: ## Run unit tests with race detector and coverage
 test-integration: ## Run integration tests (requires infra up: make infra-up)
 	go test -tags integration ./...
 
+.PHONY: cover
+cover: ## Run unit tests and report total coverage
+	go test -covermode=atomic -coverprofile=coverage.out ./...
+	go tool cover -func=coverage.out | tail -1
+
+.PHONY: cover-diff
+cover-diff: ## New-code coverage vs origin/main (CI enforces >=99%)
+	go test -covermode=atomic -coverprofile=coverage.out ./...
+	git diff -U0 --no-color origin/main...HEAD > coverage.patch
+	go run github.com/seriousben/go-patch-cover/cmd/go-patch-cover@v0.2.0 coverage.out coverage.patch
+
+.PHONY: hooks
+hooks: ## Install local git hooks (run once after clone)
+	git config core.hooksPath .githooks
+	@echo "git hooks installed (core.hooksPath=.githooks)"
+
 .PHONY: vet
 vet: ## Run go vet
 	go vet ./...

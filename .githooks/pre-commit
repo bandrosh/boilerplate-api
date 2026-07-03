@@ -1,6 +1,6 @@
 #!/bin/sh
 # Local pre-commit gate: code must build, vet clean, and unit tests must pass
-# before a commit is created. The authoritative >=99% new-code coverage gate
+# before a commit is created. The authoritative >=95% new-code coverage gate
 # runs in CI (see .github/workflows/ci.yml, job "New-code coverage").
 #
 # Install once after cloning:  make hooks

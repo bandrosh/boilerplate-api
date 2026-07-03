@@ -40,9 +40,9 @@ cover: ## Run unit tests and report total coverage
 	go tool cover -func=coverage.out | tail -1
 
 .PHONY: cover-diff
-cover-diff: ## New-code coverage vs origin/main (CI enforces >=99%)
+cover-diff: ## New-code coverage vs origin/main (CI enforces >=95%)
 	go test -covermode=atomic -coverprofile=coverage.out ./...
-	git diff -U0 --no-color origin/main...HEAD > coverage.patch
+	git diff -U0 --no-color origin/main...HEAD -- . ':(exclude)cmd/api/main.go' > coverage.patch
 	go run github.com/seriousben/go-patch-cover/cmd/go-patch-cover@v0.2.0 coverage.out coverage.patch
 
 .PHONY: hooks

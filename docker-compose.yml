@@ -4,20 +4,25 @@
 name: boilerplate-api
 
 services:
-  localstack:
-    image: localstack/localstack:3.8
-    container_name: bp_localstack
+  # Floci is a drop-in LocalStack replacement (same port, same wire protocol).
+  # The `-compat` tag bundles the AWS CLI / awslocal used by the init script.
+  floci:
+    image: floci/floci:1.5.34-compat
+    container_name: bp_floci
     environment:
-      SERVICES: dynamodb
-      DEBUG: "0"
+      FLOCI_HOSTNAME: floci          # hostname used in URLs returned to other containers
+      FLOCI_DEFAULT_REGION: us-east-1
+      FLOCI_STORAGE_MODE: hybrid     # in-memory with async flush to disk
       AWS_DEFAULT_REGION: us-east-1
       DYNAMODB_TABLE: boilerplate
     ports:
-      - "4566:4566"   # LocalStack edge / DynamoDB endpoint
+      - "4566:4566"   # Floci edge / DynamoDB endpoint
     volumes:
-      # Init scripts under ready.d run automatically once LocalStack is ready.
-      - ./docker/localstack/init:/etc/localstack/init/ready.d:ro
-      - localstackdata:/var/lib/localstack
+      # Init scripts under ready.d run automatically once Floci is ready.
+      - ./docker/floci/init:/etc/localstack/init/ready.d:ro
+      # /app/data is Floci's default persistent path and is owned by the
+      # non-root container user, so the named volume inherits its permissions.
+      - flocidata:/app/data
     healthcheck:
       test: ["CMD-SHELL", "awslocal dynamodb list-tables || exit 1"]
       interval: 5s
@@ -28,14 +33,14 @@ services:
     image: aaronshaf/dynamodb-admin:4.6.1
     container_name: bp_dynamodb_admin
     environment:
-      DYNAMO_ENDPOINT: http://localstack:4566
+      DYNAMO_ENDPOINT: http://floci:4566
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
     ports:
       - "8001:8001"   # DynamoDB Admin UI
     depends_on:
-      - localstack
+      - floci
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.111.0
@@ -96,6 +101,6 @@ services:
       - tempo
 
 volumes:
-  localstackdata:
+  flocidata:
   tempodata:
   grafanadata:

@@ -2,7 +2,7 @@
 
 REST API boilerplate in **Go**, built with a **Hexagonal (Ports & Adapters) + DDD-lite** architecture, ready for robust production projects.
 
-The application **runs from the IDE / locally** (`go run ./cmd/api`); **Docker contains infrastructure only** (LocalStack/DynamoDB + an observability stack with Grafana).
+The application **runs from the IDE / locally** (`go run ./cmd/api`); **Docker contains infrastructure only** (Floci/DynamoDB + an observability stack with Grafana).
 
 ## Stack
 
@@ -10,7 +10,7 @@ The application **runs from the IDE / locally** (`go run ./cmd/api`); **Docker c
 |------------------|--------------------------------------------------------|
 | HTTP router      | [chi](https://github.com/go-chi/chi)                   |
 | Persistence      | **DynamoDB** ([AWS SDK for Go v2](https://github.com/aws/aws-sdk-go-v2)) — single-table design |
-| Local AWS        | [LocalStack](https://localstack.cloud)                 |
+| Local AWS        | [Floci](https://floci.io) (drop-in LocalStack replacement) |
 | Config           | env + `.env` ([caarlos0/env](https://github.com/caarlos0/env), godotenv) |
 | Logging          | `log/slog` (structured)                                |
 | Observability    | OpenTelemetry → OTEL Collector → Prometheus / Tempo / Grafana |
@@ -26,7 +26,7 @@ internal/
     http                   # inbound adapter (chi): router, handlers, dto, middleware
     dynamodb               # outbound adapter: AWS SDK v2 client, single-table repository
   platform/                # cross-cutting: config, logger, observability, server
-docker/                    # infra configs (localstack init, otel, prometheus, tempo, grafana)
+docker/                    # infra configs (floci init, otel, prometheus, tempo, grafana)
 ```
 
 The dependency rule points **inward**: `adapter → application → domain`. The domain knows nothing about HTTP or DynamoDB; adapters implement the *ports* defined in the domain. Swapping persistence (e.g. DynamoDB → Postgres) only affects the outbound adapter.
@@ -51,9 +51,9 @@ A single table (`boilerplate`) with generic `PK`/`SK` keys and a global index `G
 
 ### 2. Start the infrastructure
 ```bash
-make infra-up        # localstack(dynamodb) + otel-collector + prometheus + tempo + grafana
+make infra-up        # floci(dynamodb) + otel-collector + prometheus + tempo + grafana
 ```
-LocalStack creates the table automatically via the init script (`docker/localstack/init`).
+Floci creates the table automatically via the init script (`docker/floci/init`).
 Check it with `make db-tables`.
 
 ### 3. Configure the environment
@@ -102,15 +102,15 @@ curl "127.0.0.1:8080/api/v1/users?limit=10"
 | Tempo (API)     | http://127.0.0.1:3200     | –             |
 | Jaeger UI       | http://127.0.0.1:16686    | –             |
 | DynamoDB Admin  | http://127.0.0.1:8001     | –             |
-| LocalStack      | http://127.0.0.1:4566     | –             |
+| Floci (AWS)     | http://127.0.0.1:4566     | –             |
 
-The application exports traces and metrics via OTLP (`127.0.0.1:4317`) to the OTEL Collector, which fans out to Tempo and Jaeger (traces) and Prometheus (metrics). Grafana ships with provisioned datasources and an HTTP dashboard. **DynamoDB Admin** lets you browse the DynamoDB tables in LocalStack.
+The application exports traces and metrics via OTLP (`127.0.0.1:4317`) to the OTEL Collector, which fans out to Tempo and Jaeger (traces) and Prometheus (metrics). Grafana ships with provisioned datasources and an HTTP dashboard. **DynamoDB Admin** lets you browse the DynamoDB tables in Floci.
 
 ## Useful commands
 
 ```bash
 make help            # list all targets
-make db-tables       # list DynamoDB tables (LocalStack)
+make db-tables       # list DynamoDB tables (Floci)
 make db-scan         # scan the table (debug)
 make test            # unit tests (-race and coverage)
 make test-integration # integration tests (requires infra: make infra-up)
@@ -121,7 +121,7 @@ make infra-down      # tear down the infra
 ## Tests
 
 - **Unit:** domain (`internal/domain/user`) and use cases (`internal/application/user`, with a fake repository). Always run: `make test`.
-- **Integration:** DynamoDB repository against LocalStack, behind the `integration` build tag. Start the infra (`make infra-up`) and run `make test-integration`. CI has a dedicated job with LocalStack.
+- **Integration:** DynamoDB repository against Floci, behind the `integration` build tag. Start the infra (`make infra-up`) and run `make test-integration`. CI has a dedicated job with Floci.
 
 ## Adding a new feature
 
@@ -129,4 +129,4 @@ make infra-down      # tear down the infra
 2. Write the use cases in `internal/application/<feature>`.
 3. Implement the repository in `internal/adapter/dynamodb` (define the key pattern in the single table).
 4. Expose it via handlers in `internal/adapter/http` and mount it in `router.go`.
-5. If you need new tables/indexes, adjust the init in `docker/localstack/init`.
+5. If you need new tables/indexes, adjust the init in `docker/floci/init`.

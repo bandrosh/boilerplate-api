@@ -64,7 +64,7 @@ fmt: ## Format the codebase
 
 # ─── Infrastructure (Docker = infra only) ────────────────────
 .PHONY: infra-up
-infra-up: ## Start LocalStack (DynamoDB) + observability stack
+infra-up: ## Start Floci (DynamoDB) + observability stack
 	docker compose up -d
 
 .PHONY: infra-down
@@ -79,15 +79,15 @@ infra-clean: ## Stop infra and delete volumes
 logs: ## Tail infrastructure logs
 	docker compose logs -f
 
-# ─── DynamoDB helpers (LocalStack) ───────────────────────────
+# ─── DynamoDB helpers (Floci) ────────────────────────────────
 .PHONY: db-tables
-db-tables: ## List DynamoDB tables in LocalStack
-	docker compose exec localstack awslocal dynamodb list-tables
+db-tables: ## List DynamoDB tables in Floci
+	docker compose exec floci awslocal dynamodb list-tables
 
 .PHONY: db-scan
 db-scan: ## Scan the table (debug only)
-	docker compose exec localstack awslocal dynamodb scan --table-name $(DYNAMODB_TABLE)
+	docker compose exec floci awslocal dynamodb scan --table-name $(DYNAMODB_TABLE)
 
 .PHONY: db-recreate
-db-recreate: ## Re-run the table init script inside LocalStack
-	docker compose exec localstack bash /etc/localstack/init/ready.d/01-create-tables.sh
+db-recreate: ## Re-run the table init script inside Floci
+	docker compose exec floci bash /etc/localstack/init/ready.d/01-create-tables.sh

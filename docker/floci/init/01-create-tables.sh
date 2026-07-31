@@ -1,5 +1,5 @@
 #!/bin/bash
-# Runs automatically inside the LocalStack container once it is ready.
+# Runs automatically inside the Floci container once it is ready.
 # Creates the single-table-design table with a generic GSI1.
 set -euo pipefail
 

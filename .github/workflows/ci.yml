@@ -91,6 +91,10 @@ jobs:
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
+          if ! git cat-file -e "origin/${BASE_REF}:go.mod" 2>/dev/null; then
+            echo "Base branch has no Go module (initial scaffold); coverage gate skipped."
+            exit 0
+          fi
           # Composition root (cmd/api/main.go) wires live AWS clients and is
           # not unit-testable; exclude it from the new-code coverage gate.
           git diff -U0 --no-color "origin/${BASE_REF}...HEAD" \
